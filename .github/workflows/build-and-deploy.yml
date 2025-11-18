@@ -1,0 +1,82 @@
+name: CI/CD to ECR
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - "src/**"
+  workflow_dispatch:
+
+env:
+  AWS_REGION: ${{ secrets.AWS_REGION }}
+  AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
+  ECR_REGISTRY: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 2
+
+      - name: Detect changed services
+        id: detect
+        run: |
+          SERVICES=""
+          
+          if git diff --name-only HEAD~1 HEAD | grep -q "^src/ui/"; then
+            SERVICES="$SERVICES ui"
+          fi
+          if git diff --name-only HEAD~1 HEAD | grep -q "^src/catalog/"; then
+            SERVICES="$SERVICES catalog"
+          fi
+          if git diff --name-only HEAD~1 HEAD | grep -q "^src/cart/"; then
+            SERVICES="$SERVICES cart"
+          fi
+          if git diff --name-only HEAD~1 HEAD | grep -q "^src/orders/"; then
+            SERVICES="$SERVICES orders"
+          fi
+          if git diff --name-only HEAD~1 HEAD | grep -q "^src/checkout/"; then
+            SERVICES="$SERVICES checkout"
+          fi
+
+          echo "Services changed: $SERVICES"
+          echo "services=$SERVICES" >> $GITHUB_OUTPUT
+
+      - name: Stop if nothing changed
+        if: steps.detect.outputs.services == ''
+        run: echo "No services changed. Stopping workflow."
+
+      - name: Configure AWS credentials
+        if: steps.detect.outputs.services != ''
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        if: steps.detect.outputs.services != ''
+        uses: aws-actions/amazon-ecr-login@v1
+
+      - name: Build and Push Images
+        if: steps.detect.outputs.services != ''
+        run: |
+          COMMIT_SHA=${GITHUB_SHA::7}
+
+          for SERVICE in ${{ steps.detect.outputs.services }}; do
+            IMAGE="$ECR_REGISTRY/retail-store-$SERVICE:$COMMIT_SHA"
+
+            echo "-----------------------------------"
+            echo "Building image for: $SERVICE"
+            echo "Image: $IMAGE"
+            echo "-----------------------------------"
+
+            docker build -t $IMAGE ./src/$SERVICE
+            docker push $IMAGE
+
+            echo "Finished uploading $SERVICE"
+          done
