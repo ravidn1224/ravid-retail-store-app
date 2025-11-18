@@ -68,7 +68,7 @@ jobs:
           COMMIT_SHA=${GITHUB_SHA::7}
 
           for SERVICE in ${{ steps.detect.outputs.services }}; do
-            IMAGE="$ECR_REGISTRY/retail-store-$SERVICE:$COMMIT_SHA"
+            IMAGE="$ECR_REGISTRY/ravid-retail-store-$SERVICE:$COMMIT_SHA"
 
             echo "-----------------------------------"
             echo "Building image for: $SERVICE"
