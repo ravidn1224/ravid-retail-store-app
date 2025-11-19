@@ -59,6 +59,11 @@ resource "aws_instance" "control_plane" {
   iam_instance_profile        = var.instance_profile_name
   user_data                   = local.user_data
 
+  root_block_device {
+    volume_size = 30   # or 50, choose what you want
+    volume_type = "gp2"
+  }
+
   tags = { Name = "${var.project_name}-control-plane" }
 }
 
@@ -72,6 +77,11 @@ resource "aws_instance" "workers" {
   vpc_security_group_ids      = [var.worker_sg_id]
   iam_instance_profile        = var.instance_profile_name
   user_data                   = local.user_data
+
+  root_block_device {
+    volume_size = 20   # or 50
+    volume_type = "gp2"
+  }
 
   tags = { Name = "${var.project_name}-worker-${count.index}" }
 }
