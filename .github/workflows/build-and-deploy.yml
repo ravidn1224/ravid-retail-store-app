@@ -66,17 +66,27 @@ jobs:
         if: steps.detect.outputs.services != ''
         run: |
           COMMIT_SHA=${GITHUB_SHA::7}
-
+      
           for SERVICE in ${{ steps.detect.outputs.services }}; do
-            IMAGE="$ECR_REGISTRY/ravid-retail-store-$SERVICE:$COMMIT_SHA"
-
+      
+            IMAGE_SHA="$ECR_REGISTRY/ravid-retail-store-$SERVICE:$COMMIT_SHA"
+            IMAGE_LATEST="$ECR_REGISTRY/ravid-retail-store-$SERVICE:latest"
+      
             echo "-----------------------------------"
             echo "Building image for: $SERVICE"
-            echo "Image: $IMAGE"
+            echo "SHA Image: $IMAGE_SHA"
+            echo "Latest Image: $IMAGE_LATEST"
             echo "-----------------------------------"
-
-            docker build -t $IMAGE ./src/$SERVICE
-            docker push $IMAGE
-
+      
+            # Build image with both tags
+            docker build \
+              -t $IMAGE_SHA \
+              -t $IMAGE_LATEST \
+              ./src/$SERVICE
+      
+            # Push both tags
+            docker push $IMAGE_SHA
+            docker push $IMAGE_LATEST
+      
             echo "Finished uploading $SERVICE"
           done
