@@ -48,9 +48,12 @@ RUN useradd \
 WORKDIR /app
 USER appuser
 
-COPY --chown=appuser:appuser --from=build-env /appsrc/main /app/
+# COPY --chown=appuser:appuser --from=build-env /appsrc/main /app/
+COPY --from=build-env --chown=appuser:appuser /appsrc/main /app/main
+COPY --chown=appuser:appuser ./ATTRIBUTION.md ./ATTRIBUTION.md
+COPY --chown=appuser:appuser ./LICENSES.md ./LICENSES.md
 
-COPY ./ATTRIBUTION.md ./LICENSES.md
+# COPY ./ATTRIBUTION.md ./LICENSES.md
 
 ENV GIN_MODE=release
 
