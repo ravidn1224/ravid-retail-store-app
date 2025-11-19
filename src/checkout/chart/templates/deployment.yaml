@@ -14,6 +14,8 @@ spec:
       labels:
         {{- include "checkout.selectorLabels" . | nindent 8 }}
     spec:
+      imagePullSecrets:
+        {{- toYaml .Values.imagePullSecrets | nindent 8 }}
       containers:
         - name: {{ include "checkout.name" . }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
@@ -22,19 +24,18 @@ spec:
           ports:
             - containerPort: 8080
 
-          livenessProbe:
-            httpGet:
-              path: {{ .Values.livenessProbe.path }}
-              port: 8080
-            initialDelaySeconds: {{ .Values.livenessProbe.initialDelaySeconds }}
-            periodSeconds: {{ .Values.livenessProbe.periodSeconds }}
-
-          readinessProbe:
-            httpGet:
-              path: {{ .Values.readinessProbe.path }}
-              port: 8080
-            initialDelaySeconds: {{ .Values.readinessProbe.initialDelaySeconds }}
-            periodSeconds: {{ .Values.readinessProbe.periodSeconds }}
-
+          # livenessProbe:
+          #   httpGet:
+          #     path: {{ .Values.livenessProbe.path }}
+          #     port: 8080
+          #   initialDelaySeconds: {{ .Values.livenessProbe.initialDelaySeconds }}
+          #   periodSeconds: {{ .Values.livenessProbe.periodSeconds }}
+          
+          # readinessProbe:
+          #   httpGet:
+          #     path: {{ .Values.readinessProbe.path }}
+          #     port: 8080
+          #   initialDelaySeconds: {{ .Values.readinessProbe.initialDelaySeconds }}
+          #   periodSeconds: {{ .Values.readinessProbe.periodSeconds }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}

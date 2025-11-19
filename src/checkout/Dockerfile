@@ -34,7 +34,8 @@ RUN useradd \
 WORKDIR /app
 USER appuser
 
-COPY --chown=node:node --from=build /usr/src/app/node_modules ./node_modules
-COPY --chown=node:node --from=build /usr/src/app/dist ./dist
+COPY --chown=appuser:appuser --from=build /usr/src/app/node_modules ./node_modules
+COPY --chown=appuser:appuser --from=build /usr/src/app/dist ./dist
+RUN chown -R appuser:appuser /app
 
 ENTRYPOINT [ "node", "dist/main.js" ]# trigger cart
