@@ -46,4 +46,5 @@ COPY --chown=appuser:appuser --from=build /usr/src/app/dist ./dist
 
 RUN chown -R appuser:appuser /app
 
-ENTRYPOINT ["node", "dist/main.js"]# trigger cart
+ENTRYPOINT ["node", "dist/main.js"]
+# trigger build
