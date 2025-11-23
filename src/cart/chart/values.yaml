@@ -25,4 +25,4 @@ readinessProbe:
 
 
 imagePullSecrets:
-  - name: regcred
+  - name: ecr-secret

@@ -16,23 +16,22 @@ resources:
   limits:
     memory: 256Mi
 
-# livenessProbe:
-#   path: /health
-#   initialDelaySeconds: 10
-#   periodSeconds: 15
-
-# readinessProbe:
-#   path: /health
-#   initialDelaySeconds: 5
-#   periodSeconds: 10
-
 livenessProbe:
-  enabled: false
+  path: /health
+  initialDelaySeconds: 20
+  periodSeconds: 10
 
 readinessProbe:
-  enabled: false
+  path: /health
+  initialDelaySeconds: 10
+  periodSeconds: 10
 
+# livenessProbe:
+#   enabled: false
+
+# readinessProbe:
+#   enabled: false
 
 
 imagePullSecrets:
-  - name: regcred
+  - name: ecr-secret

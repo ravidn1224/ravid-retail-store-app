@@ -27,4 +27,4 @@ readinessProbe:
   periodSeconds: 10
 
 imagePullSecrets:
-  - name: regcred
+  - name: ecr-secret
