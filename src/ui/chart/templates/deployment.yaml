@@ -6,6 +6,7 @@ metadata:
     {{- include "ui.labels" . | nindent 4 }}
 spec:
   replicas: {{ .Values.replicaCount }}
+  revisionHistoryLimit: 1
   selector:
     matchLabels:
       {{- include "ui.selectorLabels" . | nindent 6 }}

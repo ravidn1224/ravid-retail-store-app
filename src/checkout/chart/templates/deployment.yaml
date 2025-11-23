@@ -6,6 +6,7 @@ metadata:
     {{- include "checkout.labels" . | nindent 4 }}
 spec:
   replicas: {{ .Values.replicaCount }}
+  revisionHistoryLimit: 1
   selector:
     matchLabels:
       {{- include "checkout.selectorLabels" . | nindent 6 }}
