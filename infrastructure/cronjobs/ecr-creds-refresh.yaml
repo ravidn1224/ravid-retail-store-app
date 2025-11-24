@@ -1,0 +1,46 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: ecr-creds-refresh
+  namespace: default
+spec:
+  schedule: "0 */11 * * *"
+  successfulJobsHistoryLimit: 5
+  failedJobsHistoryLimit: 5
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          serviceAccountName: cronjob-sa
+          restartPolicy: OnFailure
+          containers:
+            - name: ecr-refresh
+              image: odaniait/aws-kubectl:latest
+              imagePullPolicy: IfNotPresent
+              env:
+                - name: AWS_REGION
+                  value: "eu-central-1"
+                - name: SECRET_NAME
+                  value: "ecr-secret"
+                - name: AWS_ACCESS_KEY_ID
+                  valueFrom:
+                    secretKeyRef:
+                      name: aws-credentials
+                      key: aws_access_key_id
+                - name: AWS_SECRET_ACCESS_KEY
+                  valueFrom:
+                    secretKeyRef:
+                      name: aws-credentials
+                      key: aws_secret_access_key
+              command:
+                - /bin/sh
+                - "-c"
+                - |
+                  echo "Refreshing ECR secret..."
+                  PASSWORD=$(aws ecr get-login-password --region eu-central-1)
+                  kubectl delete secret ${SECRET_NAME} --ignore-not-found
+                  kubectl create secret docker-registry ${SECRET_NAME} \
+                    --docker-server=630019796862.dkr.ecr.eu-central-1.amazonaws.com \
+                    --docker-username=AWS \
+                    --docker-password="$PASSWORD"
+                  echo "Done!"
