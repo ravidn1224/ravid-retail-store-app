@@ -62,6 +62,23 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
 
+      - name: Assume ECR Role
+        if: steps.detect.outputs.services != ''
+        id: assume
+        shell: bash
+        run: |
+            CREDS=$(aws sts assume-role \
+              --role-arn arn:aws:iam::$AWS_ACCOUNT_ID:role/ravid-retail-store-ecr-user-role \
+              --role-session-name github)
+  
+            ACCESS_KEY=$(echo "$CREDS" | sed -n 's/.*"AccessKeyId": "\(.*\)".*/\1/p')
+            SECRET_KEY=$(echo "$CREDS" | sed -n 's/.*"SecretAccessKey": "\(.*\)".*/\1/p')
+            SESSION_TOKEN=$(echo "$CREDS" | sed -n 's/.*"SessionToken": "\(.*\)".*/\1/p')
+  
+            echo "AWS_ACCESS_KEY_ID=$ACCESS_KEY" >> $GITHUB_ENV
+            echo "AWS_SECRET_ACCESS_KEY=$SECRET_KEY" >> $GITHUB_ENV
+            echo "AWS_SESSION_TOKEN=$SESSION_TOKEN" >> $GITHUB_ENV
+
       - name: Login to Amazon ECR
         if: steps.detect.outputs.services != ''
         uses: aws-actions/amazon-ecr-login@v1
