@@ -64,6 +64,16 @@ resource "aws_instance" "control_plane" {
     volume_type = "gp2"
   }
 
+  lifecycle {
+  ignore_changes = [
+    associate_public_ip_address,
+    public_ip,
+    public_dns,
+    ipv6_addresses,
+    primary_network_interface_id
+    ]
+  }
+
   tags = { Name = "${var.project_name}-control-plane" }
 }
 
@@ -81,6 +91,16 @@ resource "aws_instance" "workers" {
   root_block_device {
     volume_size = 20   # or 50
     volume_type = "gp2"
+  }
+  
+  lifecycle {
+  ignore_changes = [
+    associate_public_ip_address,
+    public_ip,
+    public_dns,
+    ipv6_addresses,
+    primary_network_interface_id
+    ]
   }
 
   tags = { Name = "${var.project_name}-worker-${count.index}" }

@@ -46,6 +46,6 @@ module "alb" {
   worker_instance_ids = module.ec2.worker_instance_ids
 
   target_port         = 30080
-  health_check_path   = "/health"
+  health_check_path   = "/"
 }
 
