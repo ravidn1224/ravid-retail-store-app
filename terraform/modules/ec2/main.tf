@@ -66,11 +66,7 @@ resource "aws_instance" "control_plane" {
 
   lifecycle {
   ignore_changes = [
-    associate_public_ip_address,
-    public_ip,
-    public_dns,
-    ipv6_addresses,
-    primary_network_interface_id
+    associate_public_ip_address
     ]
   }
 
@@ -95,17 +91,16 @@ resource "aws_instance" "workers" {
   
   lifecycle {
   ignore_changes = [
-    associate_public_ip_address,
-    public_ip,
-    public_dns,
-    ipv6_addresses,
-    primary_network_interface_id
+    associate_public_ip_address
     ]
   }
 
   tags = { Name = "${var.project_name}-worker-${count.index}" }
 }
 
-output "control_plane_public_ip" { value = aws_instance.control_plane.public_ip }
-output "worker_public_ips"       { value = [for i in aws_instance.workers : i.public_ip] }
-output "worker_instance_ids"     { value = [for i in aws_instance.workers : i.id]}
+# output "control_plane_public_ip" { value = aws_instance.control_plane.public_ip }
+# output "worker_public_ips"       { value = [for i in aws_instance.workers : i.public_ip] }
+# output "worker_instance_ids"     { value = [for i in aws_instance.workers : i.id]}
+output "worker_instance_ids" {
+  value = [for w in aws_instance.workers : w.id]
+}
