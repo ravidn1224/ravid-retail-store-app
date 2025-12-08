@@ -19,7 +19,7 @@ variable "worker_instance_ids" {
 variable "target_port" {
   description = "Port exposed on workers (NodePort)"
   type        = number
-  default     = 30080
+  default     = 30113
 }
 
 variable "health_check_path" {

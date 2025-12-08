@@ -45,7 +45,7 @@ module "alb" {
   public_subnets      = module.vpc.public_subnet_ids
   worker_instance_ids = module.ec2.worker_instance_ids
 
-  target_port         = 30080
+  target_port         = 30113
   health_check_path   = "/"
 }
 
