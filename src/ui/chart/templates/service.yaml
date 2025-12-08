@@ -10,5 +10,9 @@ spec:
     - port: {{ .Values.service.port }}
       targetPort: 8080
       protocol: TCP
+      {{- if eq .Values.service.type "NodePort" }}
+      nodePort: {{ .Values.service.nodePort }}
+      {{- end }}
+      
   selector:
     {{- include "ui.selectorLabels" . | nindent 4 }}
