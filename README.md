@@ -1,513 +1,65 @@
-# Retail Store Sample App - Kubernetes kubeadm Cluster Project
+# Reflections
 
-![Banner](./docs/images/banner.png) 
-
-<div align="center">
-  <div align="center"> 
-
-![GitHub License](https://img.shields.io/github/license/LondheShubham153/retail-store-sample-app?color=green)
-
-  </div>
-
-  <strong>
-  <h2>Kubernetes kubeadm Cluster Project</h2>
-  </strong>
-</div>
-
-This is a comprehensive Kubernetes project designed to teach students how to deploy a complete microservices application on a **kubeadm cluster**. The project covers cluster setup, infrastructure provisioning with Terraform, CI/CD pipelines, manual deployment using Helm charts, and automated GitOps-based deployment with ArgoCD.
-
-## 📋 Project Overview
-
-- Set up a **multi-node kubeadm cluster** (1 control plane + 2 worker nodes)
-- Provision infrastructure using **Terraform**
-- Implement **CI/CD pipelines** with GitHub Actions
-- Deploy applications using **Helm charts** with manual deployment
-- Manage container images with **Amazon ECR**
-- Use **Ingress Controller** for external access
-- Implement **GitOps** with ArgoCD for automated application deployment
-
-## 🏗️ Architecture
-
-The retail store application demonstrates a modern microservices architecture deployed on a kubeadm Kubernetes cluster:
-
-![Architecture](./docs/images/architecture.png)
-
-### **Application Components**
-
-| Service | Language | Description | Dependencies |
-|---------|----------|-------------|--------------|
-| **UI** | Java | Store user interface | Catalog, Cart, Orders |
-| **Catalog** | Go | Product catalog API | PostgreSQL |
-| **Cart** | Java | Shopping cart API | Redis, DynamoDB |
-| **Orders** | Java | Order management API | PostgreSQL |
-| **Checkout** | Node.js | Checkout orchestration API | Cart, Orders, RabbitMQ |
-
-### **Infrastructure Components**
-
-![Application Architecture](./docs/images/application-architecture.png)
-
-The infrastructure follows cloud-native best practices:
-- **Microservices**: Each component is developed and deployed independently
-- **Containerization**: All services run as containers on Kubernetes
-- **Infrastructure as Code**: All AWS resources defined using Terraform
-- **CI/CD**: Automated build and deployment pipelines with GitHub Actions
-- **Manual Deployment**: Helm charts for application packaging and deployment
-- **GitOps**: Declarative deployments with ArgoCD for automated synchronization
-
-## 🛠️ Prerequisites
-
-You need to install:
-- **AWS CLI** (v2+) - [Install Guide](https://docs.aws.amazon.com/cli/latest/userguide/install-cliv2.html)
-- **Terraform** (1.0+) - [Install Guide](https://developer.hashicorp.com/terraform/install)
-- **kubectl** (1.28+) - [Install Guide](https://kubernetes.io/docs/tasks/tools/)
-- **Docker** (20.0+) - [Install Guide](https://docs.docker.com/get-docker/)
-- **Helm** (3.0+) - [Install Guide](https://helm.sh/docs/intro/install/)
-- **Git** (2.0+) - [Install Guide](https://git-scm.com/downloads)
-
-### **Quick Installation Scripts**
-***Versions might be older than latest !***
-
-<details>
-<summary><strong>🔧 One-Click Installation</strong></summary>
-
-```bash
-#!/bin/bash
-# Install all prerequisites
-
-# AWS CLI
-curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
-unzip awscliv2.zip
-sudo ./aws/install
-
-# Terraform
-curl -fsSL https://apt.releases.hashicorp.com/gpg | sudo apt-key add -
-sudo apt-add-repository "deb [arch=amd64] https://apt.releases.hashicorp.com $(lsb_release -cs) main"
-sudo apt-get update && sudo apt-get install terraform
-
-# kubectl
-curl -LO "https://dl.k8s.io/release/v1.28.0/bin/linux/amd64/kubectl"
-chmod +x kubectl
-sudo mv kubectl /usr/local/bin/
-
-# Docker
-curl -fsSL https://get.docker.com -o get-docker.sh
-sudo sh get-docker.sh
-
-# Helm
-curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
-
-# Verify installations
-aws --version
-terraform --version
-kubectl version --client
-docker --version
-helm version
-```
-
-</details>
-
-## 📚 Project Structure
-
-```
-├── terraform/           # Infrastructure as Code
-├── src/                # Application source code
-│   ├── ui/             # Java frontend
-│   ├── catalog/        # Go catalog API
-│   ├── cart/           # Java cart API
-│   ├── orders/         # Java orders API
-│   └── checkout/       # Node.js checkout API
-├── scripts/            # Cluster setup scripts 
-├── .github/workflows/  # CI/CD pipelines 
-└── docs/               # Documentation
-```
-
-## 🚀 Complete Implementation Guide
-
-## **Phase 1: Infrastructure Setup**
-
-### **Step 1.1: Configure AWS Credentials**
-
-```bash
-# Configure AWS CLI with your credentials
-aws configure
-```
-
-### **Step 1.2: Terraform Infrastructure**
-
-**Your Task**: Create Terraform configuration to provision AWS infrastructure for your kubeadm cluster.
-
-#### **Required Infrastructure Components:**
-
-1. **VPC and Networking**:
-   - VPC with **public subnets** (required)
-   - **Private subnets** (bonus challenge - see below)
-   - Internet Gateway (required)
-   - NAT Gateway (required if using private subnets)
-   - Route tables and associations
-   - DNS resolution configuration
-
-2. **Security Groups**:
-   - **Control Plane Node**: SSH (22), Kubernetes API (6443), etcd (2379-2380), Kubelet API (10250), CNI ports
-   - **Worker Nodes**: SSH (22), Kubelet API (10250), CNI ports
-
-3. **EC2 Instances**:
-   - **Control Plane**: t2.medium, Ubuntu 
-   - **Worker Nodes**: t2.medium each, Ubuntu 
-   - User data scripts to install Docker and kubeadm (Can also be AMI)
-   - **Deploy on public subnets** for easier setup and access
-
-4. **Additional Resources**:
-   - IAM roles for ECR access
-   - ECR repositories for all 5 services
-   - Application Load Balancer (Can be set up later)
-
-#### **Deployment Strategy - Public vs Private Subnets**
-
-**📌 Main Requirement: Public Subnet Deployment**
-- Deploy all cluster nodes on **public subnets** for easier setup
-
-**🏆 Bonus Challenge: Private Subnet Deployment**
-- Deploy worker nodes on **private subnets** for enhanced security
-
-
-#### **Terraform Structure**:
-
-**Your Task**: Design and implement your own Terraform structure. Consider using **modules** to organize your code for better maintainability and reusability.
-
-**Suggestions**:
-- Use **modules** for different components (VPC, EC2, ECR, etc.)
-- Organize files logically (by resource type, environment, or functionality)
-- Consider using **locals** for computed values and common configurations
-- Implement **variables** for customization and reusability
-- Define **outputs** for values needed by other components
-
-
-**Best Practices**:
-- Use meaningful resource names and tags
-- Implement proper state management and locking
-- Follow Terraform coding standards
-
-
-## **Phase 2: kubeadm Cluster Setup**
-
-### **Step 2.1: Cluster Setup Scripts**
-
-**Your Task**: Create shell scripts to set up the kubeadm Kubernetes cluster.
-
-***You can skip this phase if you used an AMI.***
-
-#### **Required Scripts**:
-
-1. **`scripts/install-prerequisites.sh`**:
-   - Install Docker, kubeadm, kubelet, kubectl
-   - Configure Docker daemon
-   - Set up kernel modules and sysctl settings
-   - Disable swap
-
-2. **`scripts/setup-control-plane.sh`**:
-   - Initialize kubeadm cluster
-   - Install CNI plugin (Calico recommended)
-   - Configure kubectl
-   - Generate join command for worker nodes
-
-3. **`scripts/setup-worker-nodes.sh`**:
-   - Install Docker and kubeadm
-   - Join cluster using token from control plane
-   - Verify node registration
-
-
-#### **Expected Results**:
-```bash
-kubectl get nodes
-# Should show 3 nodes (1 control plane + 2 workers) all in Ready state
-
-kubectl get pods --all-namespaces
-# Should show core DNS pods and CNI pods running
-```
-
-## **Phase 3: CI/CD Pipeline**
-
-### **Step 3.1: ECR Setup**
-
-**Your Task**: Create Amazon ECR repositories (with Terraform) and configure GitHub Actions for automated builds.
-
-#### **ECR Repositories**:
-- retail-store-ui
-- retail-store-catalog
-- retail-store-cart
-- retail-store-orders
-- retail-store-checkout
-
-#### **IAM Configuration**:
-Create IAM user with ECR permissions:
-```json
-{
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Effect": "Allow",
-      "Action": [
-        "ecr:GetAuthorizationToken",
-        "ecr:BatchCheckLayerAvailability",
-        "ecr:GetDownloadUrlForLayer",
-        "ecr:BatchGetImage",
-        "ecr:InitiateLayerUpload",
-        "ecr:UploadLayerPart",
-        "ecr:CompleteLayerUpload",
-        "ecr:PutImage",
-        "ecr:CreateRepository",
-        "ecr:DescribeRepositories"
-      ],
-      "Resource": "*"
-    }
-  ]
-}
-```
-
-### **Step 3.2: GitHub Actions Workflows**
-
-**Your Task**: Create GitHub Actions workflows for automated CI/CD.
-
-#### **Required Workflow Files**:
-
-1. **`.github/workflows/build-and-deploy.yml`**:
-   - Trigger on push to main branch
-   - Detect changed services in `src/` directory
-   - Build Docker images only for changed services
-   - Push images to ECR with commit hash tags
-   - Parallel builds for multiple services
-   - Push the new image to ECR Registry using the new user Credentials
-
-
-#### **GitHub Secrets Configuration**:
-```
-AWS_ACCESS_KEY_ID      # AWS access key
-AWS_SECRET_ACCESS_KEY  # AWS secret key
-AWS_REGION            # AWS region
-AWS_ACCOUNT_ID        # AWS account ID
-```
-
-
-## **Phase 4: Application Deployment**
-
-### **Step 4.1: Helm Charts**
-
-**Your Task**: Create and configure Helm charts for all 5 microservices.
-
-#### **Service Configuration Requirements**:
-
-| Service | Port | Resources | Health Check |
-|---------|------|-----------|--------------|
-| **UI** | 8080 | 512Mi RAM, 250m CPU | `/health` |
-| **Catalog** | 8080 | 256Mi RAM, 100m CPU | `/health` |
-| **Cart** | 8080 | 512Mi RAM, 250m CPU | `/health` |
-| **Orders** | 8080 | 512Mi RAM, 250m CPU | `/health` |
-| **Checkout** | 8080 | 256Mi RAM, 100m CPU | `/health` |
-
-
-
-### **Step 4.2: Install Dependencies**
-
-**Your Task**: Install the required databases and dependencies for the microservices.
-
-![Application Dependencies](./docs/images/architecture-apps.png)
-
-#### **Required Dependencies**:
-- **PostgreSQL** - for Catalog and Orders services
-- **Redis** - for Cart service caching
-- **RabbitMQ** - for Checkout service messaging
-- **DynamoDB Local** - for Cart service persistence
-
-#### **Installation Options**:
-```bash
-# Option 1: Use Helm charts (recommended)
-helm repo add bitnami https://charts.bitnami.com/bitnami
-helm install postgresql bitnami/postgresql
-helm install redis bitnami/redis
-helm install rabbitmq bitnami/rabbitmq
-
-# Option 2: Create your own Kubernetes manifests
-# Create YAML files for PostgreSQL, Redis, RabbitMQ, DynamoDB Local
-```
-
-#### **Service Connections**:
-- Use Kubernetes service names for internal communication
-
-### **Step 4.3: Manual Deployment**
-
-**Your Task**: Deploy the application using Helm charts with manual commands.
-
-#### **Deployment Order** (respect dependencies):
-
-```bash
-# 1. Deploy dependencies first (see above)
-
-# 2. Deploy application services
-helm install catalog ./src/catalog/chart
-helm install orders ./src/orders/chart
-helm install cart ./src/cart/chart
-helm install checkout ./src/checkout/chart
-helm install ui ./src/ui/chart
-```
-
-#### **Deployment Verification**:
-```bash
-# Check pod status
-kubectl get pods
-
-# Check service status
-kubectl get svc
-
-# Check ingress status
-kubectl get ingress
-
-# Test application access
-curl http://your-load-balancer-ip
-```
-
-### **Step 4.3: Ingress Controller**
-
-**Your Task**: Install and configure NGINX Ingress Controller for external access.
-
-#### **Install Ingress Controller**:
-```bash
-# Add NGINX Ingress Helm repository
-helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
-helm repo update
-
-# Install NGINX Ingress Controller
-helm install ingress-nginx ingress-nginx/ingress-nginx
-
-# Get external IP
-kubectl get svc -n ingress-nginx
-```
-
-#### **Configure Ingress Resources**:
-Create ingress configuration for external access to your application.
-
-
-## **Phase 5: GitOps with ArgoCD**
-
-### **Step 5.1: Install ArgoCD**
-
-**Your Task**: Install ArgoCD on your kubeadm cluster to enable GitOps-based deployment.
-
-#### **Installation Options**:
-- Use the course ArgoCD installation guide and module for examples
-- Or use the official ArgoCD Helm chart.
-
-### **Step 5.2: Setup GitOps Repository**
-
-**Your Task**: Create a separate GitOps repository to store your Kubernetes manifests and Helm charts.
-
-#### **Repository Setup**:
-- Create a new Git repository for your manifests (separate from application source code)
-- Choose your deployment pattern:
-  - **App of Apps** pattern (recommended for managing multiple applications)
-  - **Individual ArgoCD Application** manifests for each service
-
-### **Step 5.3: Create ArgoCD Applications**
-
-**Your Task**: Define ArgoCD Application manifests for your microservices.
-
-#### **Example: Catalog Service Application**:
-
-Create `application-catalog.yaml`:
-
-```yaml
-apiVersion: argoproj.io/v1alpha1
-kind: Application
-metadata:
-  name: retail-store-catalog
-  namespace: argocd
-  finalizers:
-    - resources-finalizer.argocd.argoproj.io
-spec:
-  project: default
-  
-  source:
-    repoURL: https://github.com/<your-username>/gitops-retail-store.git # ---> Where the Kubernetes Manifests. 
-    targetRevision: main
-    path: apps/catalog
-    helm:
-      valueFiles:
-        - values.yaml
-  
-  destination:
-    server: https://kubernetes.default.svc
-    namespace: default
-  
-  syncPolicy:
-    automated:
-      prune: true
-      selfHeal: true
-    syncOptions:
-      - CreateNamespace=true
-```
-
-#### **Required Applications**:
-Create similar ArgoCD Application manifests for:
-- `application-cart.yaml`
-- `application-orders.yaml`
-- `application-checkout.yaml`
-- `application-ui.yaml`
-- `application-dependencies.yaml` (for PostgreSQL, Redis, RabbitMQ, DynamoDB) (You can use an app per dependency)
-
-### **Step 5.4: Integrate with CI/CD Pipeline**
-
-**Your Task**: Update your GitHub Actions workflow to automatically update the GitOps repository with new image tags after successful builds.
-
-**Implementation**:
-- Add a new job in your workflow to commit updated image tags to the GitOps repository (Don't forget to use the token like we did in the class)
-- ArgoCD will automatically detect the changes and deploy the new versions
-- Ensure proper authentication to the GitOps repository using GitHub secrets
-
-
-## Project Deliverables
-
-### **Required Submissions:**
-
-1. **Forked Repository**
-   - Fork this repository to your GitHub account
-   - All your implementation code (Terraform, scripts, Helm charts, CI/CD)
-   - Clean, well-documented code with meaningful commit messages
-
-2. **GitOps Repository**
-   - Separate GitOps repository for Kubernetes manifests
-   - ArgoCD Application manifests for all services
-   - Environment-specific configurations (dev/staging/prod)
-   - Documentation on repository structure and deployment flow
-
-3. **Proof of Deployment**
-   - Screenshots of your running kubeadm cluster (`kubectl get nodes`)
-   - Screenshots of all deployed services (`kubectl get pods`)
-   - Screenshots of the retail store application running in browser
-   - Screenshots of your CI/CD pipeline execution
-   - Screenshots of ECR repositories with pushed images
-   - Screenshots of ArgoCD UI showing all applications in Synced and Healthy state
-   - Screenshots showing GitOps workflow (Git commit → ArgoCD sync → deployment)
-
-4. **Reflections Document**
-   - Create a `reflections.md` file in your repository root
-   - Include a section on your GitOps implementation experience
-   - Document the benefits and challenges of using ArgoCD vs manual Helm deployments
-
-## 📚 Learning Resources
-
-### **Kubernetes**
-- [kubeadm Installation Guide](https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/)
-- [Cluster Networking](https://kubernetes.io/docs/concepts/services-networking/)
-- [Ingress Controllers](https://kubernetes.io/docs/concepts/services-networking/ingress/)
-
-### **Terraform**
-- [AWS Provider Documentation](https://registry.terraform.io/providers/hashicorp/aws/latest/docs)
-- [EC2 Instance Management](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/instance)
-
-### **CI/CD and Deployment**
-- [GitHub Actions Documentation](https://docs.github.com/en/actions)
-- [Helm Documentation](https://helm.sh/docs/)
-- [ECR User Guide](https://docs.aws.amazon.com/ecr/)
-
+## Overview
+This project provided hands-on experience across the full deployment lifecycle of a microservices-based application, including Kubernetes provisioning, container orchestration, CI/CD, and GitOps methodologies. Throughout the process, I encountered several technical challenges that helped me deepen my understanding of real-world DevOps workflows.
 
 ---
+
+## Key Challenges and How I Resolved Them
+
+### 1. NodePort Instability Breaking the UI Service
+One of the most difficult issues I faced involved my UI service constantly breaking during Helm and ArgoCD sync operations. After debugging the Kubernetes service configuration, I discovered that Kubernetes was dynamically reassigning NodePorts on each redeployment. Because my ALB was configured to forward traffic to the previously assigned port, the UI became inaccessible every time a sync occurred.
+
+I realized the root cause was that the Helm chart did not explicitly define a fixed `nodePort`. To resolve this, I updated the service template to include a static NodePort value and reconfigured the ALB to use that stable port. Once both were aligned, the UI became stable and fully functional.
+
+---
+
+### 2. ImagePullBackOff Errors Across Multiple Services
+Another major challenge occurred when all microservices entered `ImagePullBackOff`. After inspecting Kubernetes events, I learned that the ECR repository names did not match those configured in my Helm charts. Additionally, the imagePullSecret (`ecr-creds`) was outdated and did not contain valid ECR credentials.
+
+By updating the repository paths in all `values.yaml` files and recreating the registry secret with correct IAM permissions, the cluster was finally able to authenticate and pull all service images successfully.
+
+---
+
+### 3. Helm Chart Dependency and Directory Issues
+Initially, several Helm charts included dependency entries referencing charts that did not exist in the project. This caused Helm to repeatedly fail when checking chart dependencies. Removing these unnecessary `dependencies:` blocks and restructuring the charts ensured that each microservice deployed independently, as intended.
+
+---
+
+## GitOps Experience With ArgoCD
+Implementing GitOps through ArgoCD was one of the most valuable aspects of the project. ArgoCD continuously monitored my Git repository, automatically applied changes to the cluster, and ensured that the deployed state always matched the desired state stored in Git. I especially appreciated:
+
+- Automated syncing after each commit  
+- Clear visualization of application health and deployment structure  
+- Self-healing when the cluster drifted from the repository  
+- Easy rollbacks simply by reverting commits  
+
+This workflow significantly reduced manual errors and improved deployment reliability.
+
+---
+
+## Benefits vs. Challenges: ArgoCD vs. Manual Helm
+
+### Benefits of ArgoCD
+- Fully declarative, Git-centered deployment model  
+- Continuous monitoring and automatic syncing  
+- Self-healing to maintain desired state  
+- Enhanced visibility through ArgoCD UI  
+- Simple rollbacks through Git history  
+
+### Challenges of ArgoCD
+- Requires strict repository structure and clean charts  
+- Manual cluster edits get overwritten, enforcing discipline  
+- Secret management becomes more complex  
+- Debugging sometimes spans both Git and the running cluster  
+
+### When Helm Is Still Useful
+- Rapid local testing  
+- Debugging deployments interactively  
+- Iterating on chart development before committing to Git  
+
+---
+
+## Conclusion
+Although the project presented challenging issues—from NodePort instability to image pulling failures and Helm chart restructuring—working through them greatly strengthened my understanding of Kubernetes, Helm, GitOps, and cloud-native practices. I enjoyed designing and automating the application pipeline, and the final working deployment was both rewarding and educational.
 
