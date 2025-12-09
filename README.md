@@ -61,5 +61,5 @@ This workflow significantly reduced manual errors and improved deployment reliab
 ---
 
 ## Conclusion
-Although the project presented challenging issues—from NodePort instability to image pulling failures and Helm chart restructuring—working through them greatly strengthened my understanding of Kubernetes, Helm, GitOps, and cloud-native practices. I enjoyed designing and automating the application pipeline, and the final working deployment was both rewarding and educational.
+Although the project presented challenging issues—from NodePort instability to image pulling failures and Helm chart restructuring working through them greatly strengthened my understanding of Kubernetes, Helm, GitOps, and cloud-native practices. I enjoyed designing and automating the application pipeline, and the final working deployment was both rewarding and educational.
 
